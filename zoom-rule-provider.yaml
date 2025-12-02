@@ -1,6 +1,13 @@
 payload:
   - DOMAIN-SUFFIX,zoom.us
   - DOMAIN-SUFFIX,zpns.zoom.us
-  - DOMAIN-SUFFIX,cloud.zoom.us
-  - DOMAIN-SUFFIX,zoom.us
+  - DOMAIN-SUFFIX,zoom.com
   - DOMAIN-SUFFIX,zoomgov.com
+  - DOMAIN-SUFFIX,zoomphone.com
+  - DOMAIN-SUFFIX,zoomcloud.cn
+  - DOMAIN-SUFFIX,zoom.com.cn
+  - DOMAIN-SUFFIX,zoom.de
+  - DOMAIN-SUFFIX,zoomonprem.com
+  - DOMAIN-SUFFIX,zoomconnector.com
+  - DOMAIN-SUFFIX,zoomnet.us
+  - DOMAIN-SUFFIX,cloud.zoom.us
