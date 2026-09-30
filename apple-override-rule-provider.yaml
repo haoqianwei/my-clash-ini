@@ -1,0 +1,10 @@
+payload:
+  # 从 HotKids GenAI.yaml 中剥离的 Apple 日常系统服务，需在 AI 规则之前匹配
+  # iCloud CloudKit，包括 XProtect 更新
+  - DOMAIN-SUFFIX,gateway.icloud.com
+  # Siri、聚焦、Safari 搜索建议
+  - DOMAIN-SUFFIX,smoot.apple.com
+  # Siri 和听写
+  - DOMAIN,guzzoni.apple.com
+  # 定位服务
+  - DOMAIN,gspe1-ssl.ls.apple.com
