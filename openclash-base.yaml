@@ -1,0 +1,74 @@
+# 配合 openclash.ini 使用，仅适用于 OpenClash / Mihomo。
+# OpenClash 的端口、控制器及覆写设置优先于本文件。
+mixed-port: 7893
+redir-port: 7892
+tproxy-port: 7895
+allow-lan: true
+bind-address: "*"
+mode: rule
+log-level: warning
+ipv6: false
+external-controller: 127.0.0.1:9090
+unified-delay: true
+tcp-concurrent: true
+find-process-mode: "off"
+profile:
+  store-selected: true
+
+geodata-mode: true
+geodata-loader: memconservative
+# 地理数据库的定时更新交给 OpenClash 管理。
+geo-auto-update: false
+geox-url:
+  geoip: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip-lite.dat
+  geosite: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat
+  mmdb: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/country.mmdb
+
+dns:
+  enable: true
+  listen: 0.0.0.0:7874
+  ipv6: false
+  enhanced-mode: redir-host
+  cache-algorithm: arc
+  respect-rules: true
+  # 引导解析不依赖代理或域名，也不使用明文 UDP DNS。
+  default-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+  # 节点域名必须能在代理建立前独立解析。
+  # 若订阅提供专用节点 DoH，应在此保留它，并指定 #DIRECT。
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query#DIRECT
+    - https://223.6.6.6/dns-query#DIRECT
+  # 未命中国内及业务例外的域名，只经代理查询国外 DoH。
+  nameserver:
+    - "https://1.1.1.1/dns-query#🚀 国外流量"
+    - "https://1.0.0.1/dns-query#🚀 国外流量"
+  nameserver-policy:
+    "+.local.rightcapital.dev": &domestic_doh
+      - https://223.5.5.5/dns-query#DIRECT
+      - https://223.6.6.6/dns-query#DIRECT
+    "+.italki.com": *domestic_doh
+    "+.haoqianwei.com": *domestic_doh
+    "+.haoqianwei.cn": *domestic_doh
+    "geosite:private,cn": *domestic_doh
+  # 不配置 fallback，避免把未知的国外域名同时交给国内 DNS。
+  # 不配置 direct-nameserver，避免直连业务额外触发国内 DNS 重解析。
+
+sniffer:
+  enable: true
+  force-dns-mapping: true
+  parse-pure-ip: true
+  override-destination: false
+  sniff:
+    HTTP:
+      ports: [80, 8080-8880]
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443]
+
+# 节点、策略组、流量规则由 subconverter 生成。
+proxies: []
+proxy-groups: []
+rules: []
