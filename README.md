@@ -23,6 +23,8 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/openclash.ini
 
 更新订阅后，在 OpenClash 中选择 redir-host、启用 DNS 劫持和 DNS 遵循规则。基础模板默认 DNS 端口为 `7874`，实际以 OpenClash 设置和运行配置为准。不要再通过“自定义上游 DNS”“追加运营商 DNS”等覆写选项加入另一组上游。
 
+进程匹配由 OpenClash 的覆写设置管理，路由器上可选择关闭（`off`）。模板不写入 `find-process-mode`：转换器可能把字符串 `"off"` 输出为无引号的 `off`，随后被 OpenClash 的 YAML 1.1 解析器读成布尔值 `false`，导致内核报 `invalid find process mode`。
+
 模板将地理数据库定时更新交给 OpenClash：请在 OpenClash 中启用 GeoIP / GeoSite 数据更新。订阅应提供对应地区节点；“优选节点”按名称中的“落地”筛选，延续 `clash-country.ini` 的分组方式。
 
 本地 Cord 节点通过 OpenClash 的本地节点配置或自定义覆写单独维护，节点凭据不放在仓库模板中。
