@@ -15,7 +15,7 @@ dns:
   proxy-server-nameserver:
     - https://223.5.5.5/dns-query
     - https://223.6.6.6/dns-query
-  nameserver:
+  nameserver: &foreign_doh
     - https://1.1.1.1/dns-query
     - https://1.0.0.1/dns-query
   nameserver-policy:
@@ -25,6 +25,12 @@ dns:
     "+.italki.com": *domestic_doh
     "+.haoqianwei.com": *domestic_doh
     "+.haoqianwei.cn": *domestic_doh
+    # 按 INI 的业务规则顺序匹配：FCM 优先于 Google，AI/GitHub 优先于微软。
+    "geosite:googlefcm,zoom": *domestic_doh
+    "geosite:category-ai-!cn,google,slack,tiktok": *foreign_doh
+    "geosite:oracle": *domestic_doh
+    "geosite:bbc,telegram,github": *foreign_doh
+    "geosite:onedrive,microsoft,apple": *domestic_doh
     "geosite:private,cn": *domestic_doh
   # 本地服务返回真实地址，避免 Fake-IP 影响局域网访问。
   fake-ip-filter:

@@ -45,11 +45,14 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash/clash.ini
 | --- | --- |
 | 国内、私有域名 | 阿里 DoH `223.5.5.5` / `223.6.6.6`，指定 `#DIRECT` |
 | 既有业务例外：`local.rightcapital.dev`、`italki.com`、`haoqianwei.com`、`haoqianwei.cn` | 同上，保留原有解析需求 |
+| 默认直连业务：Google FCM、Zoom、Oracle、OneDrive、微软、Apple | 同上，DNS 与默认业务出口保持一致 |
 | 其他域名 | Cloudflare DoH `1.1.1.1` / `1.0.0.1`，指定 `#🚀 国外流量` |
 | 代理节点域名 | 独立的直连加密解析，避免依赖尚未建立的代理 |
 | DoH 服务的引导解析 | IP 地址形式的阿里 DoH，无需先查询 DoH 域名 |
 
-没有 `fallback` 和 `fallback-filter`：未知域名默认只使用代理侧解析器。微软、苹果、Zoom 等流量仍按原业务规则直连，但其 DNS 按上述域名分类处理。
+没有 `fallback` 和 `fallback-filter`：未知域名默认只使用代理侧解析器。DNS 集合策略按 INI 中的业务规则顺序排列：FCM 直连优先于 Google 代理，AI、GitHub 等代理分类优先于微软直连，避免重叠域名落到错误的 DNS 出口。
+
+DNS 按默认业务策略静态分类，适用于业务分组很少调整的使用方式。以后手动切换某个业务组的直连/代理选项时，需要同步考虑对应 DNS 策略。
 
 `nameserver-policy` 的 YAML 引用仅用于复用国内解析器列表。`proxy-server-nameserver` 使用独立列表，订阅需要专用节点 DoH 时可单独修改，不会影响业务域名的 DNS 策略。
 
@@ -57,7 +60,7 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash/clash.ini
 
 ### 与现有 OpenClash 覆写共存
 
-`/etc/openclash/custom/openclash_custom_overwrite.sh` 中的自定义修改在模板之后执行。如果路由器仍在调用之前安装的 `dns_split_policy.rb`，最终 DNS 设置由该脚本决定；本模板与该脚本采用相同的 DNS 分流原则。以后修改 DNS 策略时，需要同步更新脚本，或确认模板生效后移除该脚本的调用。
+`/etc/openclash/custom/openclash_custom_overwrite.sh` 中的自定义修改在模板之后执行。如果路由器仍在调用之前安装的 `dns_split_policy.rb`，最终 DNS 设置由该脚本决定；需要确认脚本也包含上述默认直连业务的 DNS 分类，否则会覆盖模板中的新策略。以后修改 DNS 策略时，需要同步更新脚本，或确认模板生效后移除该脚本的调用。
 
 OpenClash 也可能覆写端口、控制器、嗅探或 DNS 配置。排查时应查看实际运行配置 `/etc/openclash/config.yaml`，而非只看订阅原文件。
 
@@ -65,10 +68,13 @@ OpenClash 也可能覆写端口、控制器、嗅探或 DNS 配置。排查时�
 
 已使用 subconverter-extended v1.9.13 将包含五个地区及落地节点的模拟订阅转换为完整配置，并通过 Mihomo v1.19.32 的 `-t` 校验；同时检查了 DNS 出口、策略组引用和规则目标。
 
+默认直连业务的 DNS 调整已重新通过 Clash、Stash 模拟订阅转换，确认 DNS 策略值和匹配顺序完整保留；Clash 输出通过 Mihomo v1.19.33 的 `-t` 校验。使用真实 GeoSite 数据和本地模拟 DNS 验证了 18 个域名的解析策略，包括微软、OneDrive、Apple、Oracle、Zoom、FCM 直连，以及 AI、GitHub 优先匹配代理的情况。
+
 更新订阅后，先检查 `/etc/openclash/config.yaml`：
 
 - `dns.enhanced-mode` 为 `redir-host`。
 - 默认 `nameserver` 包含 `#🚀 国外流量`，国内策略包含 `#DIRECT`。
+- 默认直连业务使用阿里 DoH，AI、GitHub 等更早命中的代理业务仍使用 Cloudflare DoH。
 - 没有额外的 `fallback`、`direct-nameserver` 或运营商 DNS。
 - 节点域名解析不依赖代理，国内 DoH 和国外代理节点均能正常连接。
 
@@ -98,7 +104,7 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash/stash.ini
 ### 与 Clash / Mihomo 配置的差异
 
 - DNS 使用 Stash 的 `follow-rule: true`。INI 顶部将阿里 DoH 的 IP 设为直连、Cloudflare DoH 的 IP 设为 `🚀 国外流量`，不使用 Mihomo 的 `respect-rules` 或 DNS 地址中的 `#策略组` 后缀。
-- 国内域名、私有域名和既有业务例外使用阿里 DoH；其他域名使用经代理访问的 Cloudflare DoH。节点域名由独立的 `proxy-server-nameserver` 直连解析。不配置 `fallback`，部分直连业务的 DNS 仍可能依赖代理，与 `clash/clash.ini` 配置的取舍一致。
+- 国内域名、私有域名、既有业务例外，以及默认直连的 FCM、Zoom、Oracle、OneDrive、微软、Apple 使用阿里 DoH；默认代理业务和未分类域名使用经代理访问的 Cloudflare DoH。DNS 集合策略与 `clash/clash.ini` 的业务规则顺序一致。节点域名由独立的 `proxy-server-nameserver` 直连解析，不配置 `fallback`。
 - 保留 Stash 自带的 Fake-IP 接管方式，不配置路由器的 redir/tproxy 端口、DNS 监听、Mihomo 嗅探或地理数据库参数。私有域名和 `local.rightcapital.dev` 返回真实 IP；对应本地服务仍须能从运行 Stash 的设备访问。
 - Stash 的 `GEOIP` 使用 MaxMind 数据库。Telegram 域名保留 `GEOSITE,telegram`，IP 则使用独立的 `telegram-ip` 规则集，来源与原 `geoip-lite.dat` 相同，每 24 小时更新。
 
