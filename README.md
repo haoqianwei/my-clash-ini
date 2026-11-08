@@ -1,31 +1,41 @@
 # Clash 订阅转换配置
 
+## 文件分类
+
+| 目录 | 内容 |
+| --- | --- |
+| [clash/](clash/) | Clash / Mihomo 转换配置及基础模板，包括地区分组、中转和 TikTok 配置 |
+| [stash/](stash/) | Stash 专用转换配置及基础模板 |
+| [rules/](rules/) | 可独立引用的个人域名、italki 和 Zoom 规则集 |
+
+配置按客户端分类，INI 与对应的基础 YAML 放在同一目录。调整目录后，客户端中的订阅转换地址需要改为下文的新地址；新路径在提交并推送到 `main` 后生效。
+
 ## Clash / Mihomo
 
 Clash（Mihomo 内核）配置由两个文件组成：
 
 | 文件 | 用途 |
 | --- | --- |
-| [clash.ini](clash.ini) | subconverter 外部配置：生成策略组和流量规则 |
-| [clash-base.yaml](clash-base.yaml) | Mihomo 基础模板：redir-host、DNS 分流和嗅探 |
+| [clash.ini](clash/clash.ini) | subconverter 外部配置：生成策略组和流量规则 |
+| [clash-base.yaml](clash/clash-base.yaml) | Mihomo 基础模板：redir-host、DNS 分流和嗅探 |
 
-现有 `clash-country.ini`、`clash-relay.ini`、`tiktok.ini` 保留原用途；这套配置需要 Mihomo 内核，也可用于 OpenClash。
+其他 Clash 转换配置：[clash-country.ini](clash/clash-country.ini)、[clash-relay.ini](clash/clash-relay.ini)、[tiktok.ini](clash/tiktok.ini)。这套配置需要 Mihomo 内核，也可用于 OpenClash。
 
 ### 使用方式
 
 在 OpenClash 的订阅转换设置中，填写以下自定义外部配置地址：
 
 ```text
-https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash.ini
+https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash/clash.ini
 ```
 
-然后选择支持 Mihomo 的 Clash 转换目标，通常是 `target=clash&new_name=true`。转换服务须能访问 GitHub Raw，并允许读取 `clash_rule_base` 指定的远程 YAML 基础模板。只支持本地基础模板的自建转换服务，可将 `clash-base.yaml` 放到服务的 `base/` 目录，并把 INI 中的 `clash_rule_base` 改为该本地路径。
+然后选择支持 Mihomo 的 Clash 转换目标，通常是 `target=clash&new_name=true`。转换服务须能访问 GitHub Raw，并允许读取 `clash_rule_base` 指定的远程 YAML 基础模板。只支持本地基础模板的自建转换服务，可将 `clash/clash-base.yaml` 放到服务的 `base/` 目录，并把 INI 中的 `clash_rule_base` 改为 `base/clash-base.yaml`。
 
 更新订阅后，在 OpenClash 中选择 redir-host、启用 DNS 劫持和 DNS 遵循规则。基础模板默认 DNS 端口为 `7874`，实际以 OpenClash 设置和运行配置为准。不要再通过“自定义上游 DNS”“追加运营商 DNS”等覆写选项加入另一组上游。
 
 进程匹配由 OpenClash 的覆写设置管理，路由器上可选择关闭（`off`）。模板不写入 `find-process-mode`：转换器可能把字符串 `"off"` 输出为无引号的 `off`，随后被 OpenClash 的 YAML 1.1 解析器读成布尔值 `false`，导致内核报 `invalid find process mode`。
 
-模板将地理数据库定时更新交给 OpenClash：请在 OpenClash 中启用 GeoIP / GeoSite 数据更新。订阅应提供对应地区节点；“优选节点”按名称中的“落地”筛选，延续 `clash-country.ini` 的分组方式。
+模板将地理数据库定时更新交给 OpenClash：请在 OpenClash 中启用 GeoIP / GeoSite 数据更新。订阅应提供对应地区节点；“优选节点”按名称中的“落地”筛选，延续 `clash/clash-country.ini` 的分组方式。
 
 本地 Cord 节点通过 OpenClash 的本地节点配置或自定义覆写单独维护，节点凭据不放在仓库模板中。
 
@@ -66,29 +76,29 @@ OpenClash 也可能覆写端口、控制器、嗅探或 DNS 配置。排查时�
 
 ## Stash
 
-Stash 配置沿用 `clash.ini` 的业务分流、策略组、地区筛选和默认选择，适用于 Stash iOS/tvOS 3.6+ 或 macOS 4.3+。
+Stash 配置沿用 `clash/clash.ini` 的业务分流、策略组、地区筛选和默认选择，适用于 Stash iOS/tvOS 3.6+ 或 macOS 4.3+。
 
 | 文件 | 用途 |
 | --- | --- |
-| [stash.ini](stash.ini) | subconverter 外部配置：生成节点、策略组和 Stash 分流规则 |
-| [stash-base.yaml](stash-base.yaml) | Stash 基础模板：DNS 分流、Fake-IP 例外和 Telegram IP 规则集 |
+| [stash.ini](stash/stash.ini) | subconverter 外部配置：生成节点、策略组和 Stash 分流规则 |
+| [stash-base.yaml](stash/stash-base.yaml) | Stash 基础模板：DNS 分流、Fake-IP 例外和 Telegram IP 规则集 |
 
 ### 使用方式
 
 将节点订阅通过 subconverter 转换，使用 `target=clash&new_name=true`，自定义外部配置地址填写：
 
 ```text
-https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash.ini
+https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash/stash.ini
 ```
 
-转换服务需要支持 INI 模板变量，并能读取 `clash_rule_base` 指定的远程 YAML。只支持本地基础模板的自建服务，可将 `stash-base.yaml` 放到服务的 `base/` 目录，并修改 INI 中的路径。将转换得到的完整 YAML 订阅地址添加到 Stash；INI 和基础 YAML 本身都不包含节点，不能直接作为完整配置导入。
+转换服务需要支持 INI 模板变量，并能读取 `clash_rule_base` 指定的远程 YAML。只支持本地基础模板的自建服务，可将 `stash/stash-base.yaml` 放到服务的 `base/` 目录，并把 INI 中的 `clash_rule_base` 改为 `base/stash-base.yaml`。将转换得到的完整 YAML 订阅地址添加到 Stash；INI 和基础 YAML 本身都不包含节点，不能直接作为完整配置导入。
 
 新增文件提交并推送到 `main` 后，上述 GitHub Raw 地址才会生效。首次启用时，Stash 需要下载 GeoSite 数据和 Telegram IP 规则集，请先确保所选代理可用；GeoSite 数据由 Stash 按需加载，不使用 Mihomo 的 `geox-url`。
 
 ### 与 Clash / Mihomo 配置的差异
 
 - DNS 使用 Stash 的 `follow-rule: true`。INI 顶部将阿里 DoH 的 IP 设为直连、Cloudflare DoH 的 IP 设为 `🚀 国外流量`，不使用 Mihomo 的 `respect-rules` 或 DNS 地址中的 `#策略组` 后缀。
-- 国内域名、私有域名和既有业务例外使用阿里 DoH；其他域名使用经代理访问的 Cloudflare DoH。节点域名由独立的 `proxy-server-nameserver` 直连解析。不配置 `fallback`，部分直连业务的 DNS 仍可能依赖代理，与 `clash.ini` 配置的取舍一致。
+- 国内域名、私有域名和既有业务例外使用阿里 DoH；其他域名使用经代理访问的 Cloudflare DoH。节点域名由独立的 `proxy-server-nameserver` 直连解析。不配置 `fallback`，部分直连业务的 DNS 仍可能依赖代理，与 `clash/clash.ini` 配置的取舍一致。
 - 保留 Stash 自带的 Fake-IP 接管方式，不配置路由器的 redir/tproxy 端口、DNS 监听、Mihomo 嗅探或地理数据库参数。私有域名和 `local.rightcapital.dev` 返回真实 IP；对应本地服务仍须能从运行 Stash 的设备访问。
 - Stash 的 `GEOIP` 使用 MaxMind 数据库。Telegram 域名保留 `GEOSITE,telegram`，IP 则使用独立的 `telegram-ip` 规则集，来源与原 `geoip-lite.dat` 相同，每 24 小时更新。
 
@@ -99,3 +109,13 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash.ini
 ### 验证
 
 已使用 MetaCubeX/subconverter v0.9.2 发布包，将包含五个地区、落地节点和流量说明条目的模拟订阅转换为完整 YAML，确认保留 6 个有效节点、16 个策略组和 29 条规则。检查了策略组引用与循环、例外规则顺序、四个 DoH IP 的出口，以及 Telegram IPv4/IPv6 规则集。尚未在 Stash 客户端进行连接实测。
+
+## 共享规则集
+
+以下文件均为 Clash classical 格式，规则内容位于 `payload` 下，可供转换配置或兼容客户端单独引用。
+
+| 文件 | 内容 |
+| --- | --- |
+| [haoqianwei-rule-provider.yaml](rules/haoqianwei-rule-provider.yaml) | `haoqianwei.com`、`haoqianwei.cn` 域名 |
+| [italki-rule-provider.yaml](rules/italki-rule-provider.yaml) | 域名关键词 `italki` |
+| [zoom-rule-provider.yaml](rules/zoom-rule-provider.yaml) | Zoom 相关域名 |

@@ -33,7 +33,7 @@ dns:
   # 不配置 fallback，未知域名只查询代理侧 Cloudflare DoH。
 
 rule-providers:
-  # 与 clash.ini 所用 geoip-lite.dat 同源，由 Stash 每日更新。
+  # 与 clash/clash.ini 所用 geoip-lite.dat 同源，由 Stash 每日更新。
   telegram-ip:
     behavior: ipcidr
     format: yaml
