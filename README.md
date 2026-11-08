@@ -1,25 +1,25 @@
 # Clash 订阅转换配置
 
-## OpenClash / Mihomo
+## Clash / Mihomo
 
-OpenClash 专用配置由两个文件组成：
+Clash（Mihomo 内核）配置由两个文件组成：
 
 | 文件 | 用途 |
 | --- | --- |
-| [openclash.ini](openclash.ini) | subconverter 外部配置：生成策略组和流量规则 |
-| [openclash-base.yaml](openclash-base.yaml) | Mihomo 基础模板：redir-host、DNS 分流和嗅探 |
+| [clash.ini](clash.ini) | subconverter 外部配置：生成策略组和流量规则 |
+| [clash-base.yaml](clash-base.yaml) | Mihomo 基础模板：redir-host、DNS 分流和嗅探 |
 
-现有 `clash-country.ini`、`clash-relay.ini`、`tiktok.ini` 保留原用途；这套配置只面向 OpenClash / Mihomo。
+现有 `clash-country.ini`、`clash-relay.ini`、`tiktok.ini` 保留原用途；这套配置需要 Mihomo 内核，也可用于 OpenClash。
 
 ### 使用方式
 
 在 OpenClash 的订阅转换设置中，填写以下自定义外部配置地址：
 
 ```text
-https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/openclash.ini
+https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash.ini
 ```
 
-然后选择支持 Mihomo 的 Clash 转换目标，通常是 `target=clash&new_name=true`。转换服务须能访问 GitHub Raw，并允许读取 `clash_rule_base` 指定的远程 YAML 基础模板。只支持本地基础模板的自建转换服务，可将 `openclash-base.yaml` 放到服务的 `base/` 目录，并把 INI 中的 `clash_rule_base` 改为该本地路径。
+然后选择支持 Mihomo 的 Clash 转换目标，通常是 `target=clash&new_name=true`。转换服务须能访问 GitHub Raw，并允许读取 `clash_rule_base` 指定的远程 YAML 基础模板。只支持本地基础模板的自建转换服务，可将 `clash-base.yaml` 放到服务的 `base/` 目录，并把 INI 中的 `clash_rule_base` 改为该本地路径。
 
 更新订阅后，在 OpenClash 中选择 redir-host、启用 DNS 劫持和 DNS 遵循规则。基础模板默认 DNS 端口为 `7874`，实际以 OpenClash 设置和运行配置为准。不要再通过“自定义上游 DNS”“追加运营商 DNS”等覆写选项加入另一组上游。
 
@@ -63,3 +63,39 @@ OpenClash 也可能覆写端口、控制器、嗅探或 DNS 配置。排查时�
 - 节点域名解析不依赖代理，国内 DoH 和国外代理节点均能正常连接。
 
 从 Wi-Fi 客户端分别测试国内域名、国外域名，以及手动指定 `8.8.8.8` 的 UDP / TCP 查询；结合 Mihomo 连接记录确认国外 DoH 的代理链。DNS 测试显示国内解析器时，应检查被测域名是否属于国内或业务例外，及浏览器是否启用了自定义 DoH。
+
+## Stash
+
+Stash 配置沿用 `clash.ini` 的业务分流、策略组、地区筛选和默认选择，适用于 Stash iOS/tvOS 3.6+ 或 macOS 4.3+。
+
+| 文件 | 用途 |
+| --- | --- |
+| [stash.ini](stash.ini) | subconverter 外部配置：生成节点、策略组和 Stash 分流规则 |
+| [stash-base.yaml](stash-base.yaml) | Stash 基础模板：DNS 分流、Fake-IP 例外和 Telegram IP 规则集 |
+
+### 使用方式
+
+将节点订阅通过 subconverter 转换，使用 `target=clash&new_name=true`，自定义外部配置地址填写：
+
+```text
+https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash.ini
+```
+
+转换服务需要支持 INI 模板变量，并能读取 `clash_rule_base` 指定的远程 YAML。只支持本地基础模板的自建服务，可将 `stash-base.yaml` 放到服务的 `base/` 目录，并修改 INI 中的路径。将转换得到的完整 YAML 订阅地址添加到 Stash；INI 和基础 YAML 本身都不包含节点，不能直接作为完整配置导入。
+
+新增文件提交并推送到 `main` 后，上述 GitHub Raw 地址才会生效。首次启用时，Stash 需要下载 GeoSite 数据和 Telegram IP 规则集，请先确保所选代理可用；GeoSite 数据由 Stash 按需加载，不使用 Mihomo 的 `geox-url`。
+
+### 与 Clash / Mihomo 配置的差异
+
+- DNS 使用 Stash 的 `follow-rule: true`。INI 顶部将阿里 DoH 的 IP 设为直连、Cloudflare DoH 的 IP 设为 `🚀 国外流量`，不使用 Mihomo 的 `respect-rules` 或 DNS 地址中的 `#策略组` 后缀。
+- 国内域名、私有域名和既有业务例外使用阿里 DoH；其他域名使用经代理访问的 Cloudflare DoH。节点域名由独立的 `proxy-server-nameserver` 直连解析。不配置 `fallback`，部分直连业务的 DNS 仍可能依赖代理，与 `clash.ini` 配置的取舍一致。
+- 保留 Stash 自带的 Fake-IP 接管方式，不配置路由器的 redir/tproxy 端口、DNS 监听、Mihomo 嗅探或地理数据库参数。私有域名和 `local.rightcapital.dev` 返回真实 IP；对应本地服务仍须能从运行 Stash 的设备访问。
+- Stash 的 `GEOIP` 使用 MaxMind 数据库。Telegram 域名保留 `GEOSITE,telegram`，IP 则使用独立的 `telegram-ip` 规则集，来源与原 `geoip-lite.dat` 相同，每 24 小时更新。
+
+地区组仍要求订阅提供名称匹配的节点，“优选节点”仍按“落地”筛选。空组回退、FCM 直连、苹果和微软默认直连等行为沿用原配置。
+
+导入后，在 Stash 中确认国外策略组选择了有效代理，检查国内 DNS 直连、Cloudflare DoH 经代理，以及 Telegram IP 连接命中 `📲 Telegram`。Stash 专用参数参考[官方 DNS 文档](https://stash.wiki/features/dns-server)、[规则类型](https://stash.wiki/rules/rule-types)和[规则集合](https://stash.wiki/rules/rule-set)。
+
+### 验证
+
+已使用 MetaCubeX/subconverter v0.9.2 发布包，将包含五个地区、落地节点和流量说明条目的模拟订阅转换为完整 YAML，确认保留 6 个有效节点、16 个策略组和 29 条规则。检查了策略组引用与循环、例外规则顺序、四个 DoH IP 的出口，以及 Telegram IPv4/IPv6 规则集。尚未在 Stash 客户端进行连接实测。

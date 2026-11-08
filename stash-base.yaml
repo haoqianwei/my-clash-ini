@@ -1,0 +1,47 @@
+# 配合 stash.ini 使用；需要 Stash iOS/tvOS 3.6+ 或 macOS 4.3+。
+# VPN 接管、Fake-IP 和策略选择由 Stash 管理。
+mode: rule
+log-level: warning
+ipv6: false
+
+dns:
+  ipv6: false
+  # Stash 通过 stash.ini 中的 DoH IP 规则决定 DNS 出口。
+  follow-rule: true
+  default-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+  # Stash 为节点域名使用独立的直连解析链路，不跟随代理规则。
+  proxy-server-nameserver:
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
+  nameserver:
+    - https://1.1.1.1/dns-query
+    - https://1.0.0.1/dns-query
+  nameserver-policy:
+    "+.local.rightcapital.dev": &domestic_doh
+      - https://223.5.5.5/dns-query
+      - https://223.6.6.6/dns-query
+    "+.italki.com": *domestic_doh
+    "+.haoqianwei.com": *domestic_doh
+    "+.haoqianwei.cn": *domestic_doh
+    "geosite:private,cn": *domestic_doh
+  # 本地服务返回真实地址，避免 Fake-IP 影响局域网访问。
+  fake-ip-filter:
+    - "geosite:private"
+    - "+.local.rightcapital.dev"
+  # 不配置 fallback，未知域名只查询代理侧 Cloudflare DoH。
+
+rule-providers:
+  # 与 clash.ini 所用 geoip-lite.dat 同源，由 Stash 每日更新。
+  telegram-ip:
+    behavior: ipcidr
+    format: yaml
+    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.yaml
+    path: ./rules/telegram-ip.yaml
+    interval: 86400
+
+# 节点、策略组、流量规则由 subconverter 生成。
+proxies: []
+proxy-groups: []
+rules: []

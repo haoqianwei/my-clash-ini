@@ -1,4 +1,4 @@
-# 配合 openclash.ini 使用，仅适用于 OpenClash / Mihomo。
+# 配合 clash.ini 使用，需要 Mihomo 内核。
 # OpenClash 的端口、控制器及覆写设置优先于本文件。
 mixed-port: 7893
 redir-port: 7892
