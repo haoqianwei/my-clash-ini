@@ -56,6 +56,8 @@ DNS 按默认业务策略静态分类，适用于业务分组很少调整的使�
 
 `nameserver-policy` 的 YAML 引用仅用于复用国内解析器列表。`proxy-server-nameserver` 使用独立列表，订阅需要专用节点 DoH 时可单独修改，不会影响业务域名的 DNS 策略。
 
+`proxy-server-nameserver` 中的 DoH 地址不加 `#DIRECT`：Mihomo 对此项默认直连，不受 `respect-rules` 影响。OpenClash 的检测逻辑会将 `#DIRECT` 也视为代理标记；全部地址都带此后缀时，会提示“Proxy-server-nameserver 选项可能全部设置了代理选项”并自动追加 DNS。这里只去掉节点解析器的后缀，`nameserver-policy` 中的 `#DIRECT` 仍需保留。
+
 `🚀 国外流量` 必须保持为代理出口。如果重命名策略组，需要同步修改 YAML 中的 `#策略组` 后缀。浏览器或应用自行指定的 DoH 不属于 53 端口劫持范围；希望使用这套 DNS 分流时，应让应用使用系统 DNS。
 
 ### 与现有 OpenClash 覆写共存
@@ -77,6 +79,7 @@ OpenClash 也可能覆写端口、控制器、嗅探或 DNS 配置。排查时�
 - 默认直连业务使用阿里 DoH，AI、GitHub 等更早命中的代理业务仍使用 Cloudflare DoH。
 - 没有额外的 `fallback`、`direct-nameserver` 或运营商 DNS。
 - 节点域名解析不依赖代理，国内 DoH 和国外代理节点均能正常连接。
+- 订阅原文件的 `proxy-server-nameserver` 为不带 `#DIRECT` 的阿里 DoH，加载时不再出现上述自动追加 DNS 提示；若最终运行文件仍有额外地址或 `#DIRECT`，检查自定义覆写脚本。
 
 从 Wi-Fi 客户端分别测试国内域名、国外域名，以及手动指定 `8.8.8.8` 的 UDP / TCP 查询；结合 Mihomo 连接记录确认国外 DoH 的代理链。DNS 测试显示国内解析器时，应检查被测域名是否属于国内或业务例外，及浏览器是否启用了自定义 DoH。
 

@@ -35,10 +35,11 @@ dns:
     - https://223.5.5.5/dns-query
     - https://223.6.6.6/dns-query
   # 节点域名必须能在代理建立前独立解析。
-  # 若订阅提供专用节点 DoH，应在此保留它，并指定 #DIRECT。
+  # 此项默认直连，不受 respect-rules 影响；专用节点 DoH 也不加 #DIRECT。
+  # OpenClash 会把 #DIRECT 误判为代理标记，触发自动追加 DNS 的提示。
   proxy-server-nameserver:
-    - https://223.5.5.5/dns-query#DIRECT
-    - https://223.6.6.6/dns-query#DIRECT
+    - https://223.5.5.5/dns-query
+    - https://223.6.6.6/dns-query
   # 默认代理业务及未命中直连策略的域名，经代理查询国外 DoH。
   nameserver: &foreign_doh
     - "https://1.1.1.1/dns-query#🚀 国外流量"
