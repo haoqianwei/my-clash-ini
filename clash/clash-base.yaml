@@ -45,15 +45,14 @@ dns:
     - "https://1.1.1.1/dns-query#🚀 国外流量"
     - "https://1.0.0.1/dns-query#🚀 国外流量"
   nameserver-policy:
-    "+.local.rightcapital.dev": &domestic_doh
+    "+.italki.com": &domestic_doh
       - https://223.5.5.5/dns-query#DIRECT
       - https://223.6.6.6/dns-query#DIRECT
-    "+.italki.com": *domestic_doh
     "+.haoqianwei.com": *domestic_doh
     "+.haoqianwei.cn": *domestic_doh
     # 按 INI 的业务规则顺序匹配：FCM 优先于 Google，AI/GitHub 优先于微软。
     "geosite:googlefcm,zoom": *domestic_doh
-    "geosite:category-ai-!cn,google,slack,tiktok": *foreign_doh
+    "geosite:category-ai-!cn,google,tiktok": *foreign_doh
     "geosite:oracle": *domestic_doh
     "geosite:bbc,telegram,github": *foreign_doh
     "geosite:onedrive,microsoft,apple": *domestic_doh

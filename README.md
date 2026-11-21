@@ -44,7 +44,7 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/clash/clash.ini
 | 查询类型 | 解析方式 |
 | --- | --- |
 | 国内、私有域名 | 阿里 DoH `223.5.5.5` / `223.6.6.6`，指定 `#DIRECT` |
-| 既有业务例外：`local.rightcapital.dev`、`italki.com`、`haoqianwei.com`、`haoqianwei.cn` | 同上，保留原有解析需求 |
+| 既有业务例外：`italki.com`、`haoqianwei.com`、`haoqianwei.cn` | 同上，保留原有解析需求 |
 | 默认直连业务：Google FCM、Zoom、Oracle、OneDrive、微软、Apple | 同上，DNS 与默认业务出口保持一致 |
 | 其他域名 | Cloudflare DoH `1.1.1.1` / `1.0.0.1`，指定 `#🚀 国外流量` |
 | 代理节点域名 | 独立的直连加密解析，避免依赖尚未建立的代理 |
@@ -108,7 +108,7 @@ https://raw.githubusercontent.com/haoqianwei/my-clash-ini/main/stash/stash.ini
 
 - DNS 使用 Stash 的 `follow-rule: true`。INI 顶部将阿里 DoH 的 IP 设为直连、Cloudflare DoH 的 IP 设为 `🚀 国外流量`，不使用 Mihomo 的 `respect-rules` 或 DNS 地址中的 `#策略组` 后缀。
 - 国内域名、私有域名、既有业务例外，以及默认直连的 FCM、Zoom、Oracle、OneDrive、微软、Apple 使用阿里 DoH；默认代理业务和未分类域名使用经代理访问的 Cloudflare DoH。DNS 集合策略与 `clash/clash.ini` 的业务规则顺序一致。节点域名由独立的 `proxy-server-nameserver` 直连解析，不配置 `fallback`。
-- 保留 Stash 自带的 Fake-IP 接管方式，不配置路由器的 redir/tproxy 端口、DNS 监听、Mihomo 嗅探或地理数据库参数。私有域名和 `local.rightcapital.dev` 返回真实 IP；对应本地服务仍须能从运行 Stash 的设备访问。
+- 保留 Stash 自带的 Fake-IP 接管方式，不配置路由器的 redir/tproxy 端口、DNS 监听、Mihomo 嗅探或地理数据库参数。私有域名返回真实 IP；对应本地服务仍须能从运行 Stash 的设备访问。
 - Stash 的 `GEOIP` 使用 MaxMind 数据库。Telegram 域名保留 `GEOSITE,telegram`，IP 则使用独立的 `telegram-ip` 规则集，来源与原 `geoip-lite.dat` 相同，每 24 小时更新。
 
 地区组仍要求订阅提供名称匹配的节点，“优选节点”仍按“落地”筛选。空组回退、FCM 直连、苹果和微软默认直连等行为沿用原配置。
